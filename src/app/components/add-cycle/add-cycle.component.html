@@ -1,0 +1,49 @@
+<app-toolbar></app-toolbar>
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <div class="wrapper">
+          <div class="row header">
+            <div class="col-12">
+             <h1>Crear Ciclo Escolar</h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 center-vertical">
+              <span><b>Seleccionar Periodo Escolar:</b></span>
+            </div>
+            <div class="col-6">
+              <mat-form-field>
+                <mat-label>Periodo Escolar</mat-label>
+                <mat-select formControlName="period">
+                  <mat-option *ngFor="let period of periods" [value]="period.value">
+                    {{period.viewValue}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="formGroup.controls['period'].errors?.required">Debes seleccionar un periodo escolar</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row">
+              <div class="col-6 center-vertical">
+                <span class="margin-right"><b>Seleccionar Año:</b></span>
+              </div>
+              <div class="col-6">
+                <mat-form-field>
+                  <mat-label>Año</mat-label>
+                  <mat-select formControlName="year">
+                    <mat-option *ngFor="let period of years" [value]="period.value">
+                      {{period.viewValue}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="formGroup.controls['year'].errors?.required">Debes seleccionar un año</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="button-wrapper">
+                <button mat-raised-button color="primary" class="crearCicloBtn" type="submit"><b>Crear</b></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>

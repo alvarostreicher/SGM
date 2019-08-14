@@ -1,0 +1,22 @@
+.upload-excel.vertical-align {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    margin-top: 5rem;
+}
+.upload-excel.vertical-align .btn.upload{
+    width: 15vw;
+    margin-top: 2rem;
+}
+
+.upload-excel.vertical-align .uploadTag{
+    line-height: 6;
+}
+
+.upload-excel.vertical-align .btn2 {
+    min-width: 15vw;
+    margin-top: 2rem;
+}

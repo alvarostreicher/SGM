@@ -1,1 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+:root {
+    --button-color: #6C5CE7;
+    --toolbar-color: #0984E3;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.btn {
+    background-color: var(--button-color) !important;
+}
+
+.btnImg {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.btn2 {
+  background-color: var(--toolbar-color) !important;
+}

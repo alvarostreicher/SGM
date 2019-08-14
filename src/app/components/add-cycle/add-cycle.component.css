@@ -1,0 +1,40 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.wrapper .row {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+.wrapper .row.header {
+    margin-top: 2rem;
+}
+.wrapper .mat-form-field {
+    width: 70%;
+    text-align: center;
+}
+.wrapper .center-text {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+.wrapper .crearCicloBtn {
+    width: 14vw;
+    background-color: var(--button-color);
+    font-size: 18px;
+}
+.wrapper .button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+.wrapper .center-vertical {
+    align-self: center;
+    font-size: 20px;
+}
+.wrapper .row .col-6.center-vertical .margin-right {
+    margin-right: 7rem;
+}

@@ -1,0 +1,5 @@
+.toolbarLogo {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-color: var(--toolbar-color);
+}

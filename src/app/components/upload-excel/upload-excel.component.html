@@ -1,0 +1,27 @@
+<app-toolbar></app-toolbar>
+<div class="upload-excel vertical-align">
+  <div class="row">
+    <div class="col-12 center-text">
+      <h2>{{ title }}</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6">
+      <span class="uploadTag">{{ uploadTag }}</span>
+    </div>
+    <div class="col-6">
+      <button type="button" class="btn upload" color="primary" mat-raised-button (click)="fileInput.click()">
+        <div class="btnImg">
+          <span>{{ buttonTag }}</span>
+          <img [src]="upload" alt="icono de carga">
+        </div>
+      </button>
+      <input hidden (change)="onFileSelected()" #fileInput type="file" id="file" accept=".xlsx">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <button color="primary" class="btn2" mat-raised-button>Cargar</button>
+    </div>
+  </div>
+</div>
