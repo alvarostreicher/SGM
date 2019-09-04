@@ -1,0 +1,77 @@
+<!-- <div class="row" [ngClass]="{'success': isLoaded }" *ngIf="isLoaded">
+  <div class="col-12 center-text">
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24">
+      <path fill="none" d="M0 0h24v24H0V0z" />
+      <path class="successColor"
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.88-11.71L10 14.17l-1.88-1.88c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7c.39-.39.39-1.02 0-1.41-.39-.39-1.03-.39-1.42 0z" />
+    </svg>
+  </div>
+  <div class="col-12">
+    <div class="successMessage">
+      <span class="successColor">{{ successloadFile }}</span>
+    </div>
+  </div>
+</div> -->
+<div class="dashboard-wrapper">
+  <div class="full-width">
+    <mat-form-field>
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Buscar por Nombre">
+      <svg matSuffix xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <path class="fill-grey"
+          d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+        <path d="M0 0h24v24H0z" fill="none" /></svg>
+    </mat-form-field>
+  </div>
+  <mat-accordion class="example-headers-align">
+    <mat-expansion-panel (opened)="openAccordion = true" (closed)="openAccordion = false"
+      *ngFor="let dashboard of dataSource; let masterindex = index" class="separation">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <!-- hallar una forma de pasar el ciclo con observables -->
+          {{ dashboard?.maestro?.Nombre }}
+        </mat-panel-title>
+        <mat-panel-description>
+          <div style="width: 100%">
+            <mat-progress-bar mode="determinate" color="successBar" value="40"></mat-progress-bar>
+            <p class="percentage">40%</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"
+            width="24" height="24">
+            <defs>
+              <path id="a" d="M0 0h24v24H0V0z" />
+            </defs>
+            <clipPath id="b">
+              <use xlink:href="#a" overflow="visible" />
+            </clipPath>
+            <path clip-path="url(#b)" class="successSVG"
+              d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm5 16H7v-2h10v2zm-6.7-4L7 10.7l1.4-1.4 1.9 1.9 5.3-5.3L17 7.3 10.3 14z" />
+          </svg>
+          <!-- Icono de que no ha entregado, cuando despliegue que salga un mensaje -->
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <table>
+        <thead>
+          <th>
+            Materias
+          </th>
+          <th *ngFor="let evaluacion of dashboard.materias[0].evaluacion; let i = index">evaluacion {{i+1}}</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let materias of dashboard.materias; let materiasindex = index" class="materias">
+            <td>{{materias?.Materia}}</td>
+            <td class="center-text" *ngFor="let evaluacion of materias?.evaluacion; let index = index"
+              (click)="clickEvaluation(masterindex, materiasindex, evaluacion, index)" [ngClass]="{'evaluated': evaluacion !== null}">{{evaluacion}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="total-wrap">
+        <span>
+          Total:
+        </span>
+        <span>
+          {{dashboard?.total}}
+        </span>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

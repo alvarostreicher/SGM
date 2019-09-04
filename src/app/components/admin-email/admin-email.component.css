@@ -1,0 +1,18 @@
+.emailInput {
+    text-align: center;
+}
+
+.emailTitle {
+    margin-bottom: 2rem;
+}
+
+.crearEmailBtn {
+    width: 14vw;
+    background-color: var(--button-color);
+    font-size: 18px;
+    margin-top: 3rem;
+}
+
+.mat-form-field {
+    width: 70%;
+}

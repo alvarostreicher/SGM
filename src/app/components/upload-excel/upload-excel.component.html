@@ -1,27 +1,81 @@
-<app-toolbar></app-toolbar>
 <div class="upload-excel vertical-align">
   <div class="row">
     <div class="col-12 center-text">
       <h2>{{ title }}</h2>
     </div>
   </div>
+  <div class="row" *ngIf="hasError">
+      <div class="col-12 center-text">
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24">
+          <path class="errorColor"
+            d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z" />
+          </svg>
+      </div>
+      <div class="col-12">
+        <div class="successMessage">
+          <span class="errorColor">{{ successloadFile }}</span>
+        </div>
+      </div>
+    </div>
   <div class="row">
     <div class="col-6">
       <span class="uploadTag">{{ uploadTag }}</span>
     </div>
     <div class="col-6">
-      <button type="button" class="btn upload" color="primary" mat-raised-button (click)="fileInput.click()">
+      <button type="button" [disabled]="isLoaded === undefined" class="btn upload" color="secondary" mat-raised-button
+        (click)="fileInput.click()">
         <div class="btnImg">
           <span>{{ buttonTag }}</span>
-          <img [src]="upload" alt="icono de carga">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path class="svg"
+              d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z" />
+            <path d="M0 0h24v24H0z" fill="none" /></svg>
         </div>
       </button>
       <input hidden (change)="onFileSelected()" #fileInput type="file" id="file" accept=".xlsx">
     </div>
+    <div class="row" *ngIf="fullFileName">
+      <div class="col-12">
+        <div class="chip-wrapper">
+          <span class="chip-text">Seleccionado: </span>
+          <mat-chip-list aria-label="Nombre de archivo">
+            <mat-chip color="primary" [removable]="'true'" [disabled]="isLoaded === undefined" (removed)="remove()">
+              {{ fullFileName }} <svg matChipRemove xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24">
+                <path
+                  d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" />
+                <path d="M0 0h24v24H0z" fill="none" /></svg></mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="isLoaded === undefined">
+      <div class="progress-bar">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    </div>
   </div>
-  <div class="row">
+  <div class="row" *ngIf="!isLoaded">
     <div class="col-12">
-      <button color="primary" class="btn2" mat-raised-button>Cargar</button>
+      <div class="upload-wrapper">
+        <button color="main" class="btn2" [disabled]="srcResult ? false : true" mat-raised-button
+          (click)="uploadFile()">
+          <div class="btnImg">
+            <span class="uploadButtonTag">{{ uploadButtonTag }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"
+              viewBox="0 0 24 24">
+              <defs>
+                <path id="a" d="M0 0h24v24H0V0z" />
+              </defs>
+              <clipPath id="b">
+                <use xlink:href="#a" overflow="visible" />
+              </clipPath>
+              <path class="svg" clip-path="url(#b)"
+                d="M20.55 5.22l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.15.55L3.46 5.22C3.17 5.57 3 6.01 3 6.5V19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.49-.17-.93-.45-1.28zM12 9.5l5.5 5.5H14v2h-4v-2H6.5L12 9.5zM5.12 5l.82-1h12l.93 1H5.12z" />
+            </svg>
+          </div>
+        </button>
+      </div>
     </div>
   </div>
 </div>

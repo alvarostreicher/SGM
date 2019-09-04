@@ -26,6 +26,7 @@
     "@angular/platform-browser": "~8.1.2",
     "@angular/platform-browser-dynamic": "~8.1.2",
     "@angular/router": "~8.1.2",
+    "angular-notifier": "^4.1.1",
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
     "nedb-async": "0.0.9",

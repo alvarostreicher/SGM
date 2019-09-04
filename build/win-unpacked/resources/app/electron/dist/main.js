@@ -46,10 +46,6 @@ var dbFactory = new DB({
     filename: 'database.db',
     autoload: true
 });
-// const excelFile = path.join(__dirname, '../horarios2.xlsx')
-// const workbook = XLSX.readFile(excelFile);
-// const sheetName = workbook.SheetNames;
-// const sheetToJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName[0]], { range: 3, blankrows: true });
 /*
   Check if database is empty and populate with propierties
 */
@@ -76,7 +72,34 @@ var dataInDBExist = function () { return __awaiter(_this, void 0, void 0, functi
     });
 }); };
 dataInDBExist();
-// let global;
+electron_1.ipcMain.on('cycleStartScreen', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    var value;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dbFactory.asyncFind({})];
+            case 1:
+                value = (_a.sent())[0];
+                if (value.ciclos.length === 0) {
+                    event.returnValue = true;
+                }
+                return [2 /*return*/];
+        }
+    });
+}); });
+var global;
+function getGloablId() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, dbFactory.asyncFind({})];
+                case 1:
+                    global = _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+getGloablId();
 // async function getGloablId(){
 //   global = await dbFactory.asyncFind({});
 //   console.log(global);
@@ -87,7 +110,6 @@ dataInDBExist();
 //   //   console.log('new doc', newDoc);
 //   // })
 // }
-// getGloablId();
 electron_1.app.on('ready', createWindow);
 electron_1.app.on('activate', function () {
     if (win === null) {
@@ -98,9 +120,12 @@ electron_1.app.on('window-all-closed', function () {
     electron_1.app.quit();
 });
 function createWindow() {
-    win = new electron_1.BrowserWindow({ show: false });
+    win = new electron_1.BrowserWindow({
+        show: false, webPreferences: {
+            nodeIntegration: true
+        }
+    });
     win.maximize();
-    win.show();
     win.loadURL(url.format({
         pathname: path.join(__dirname, "/../../dist/SGM/index.html"),
         protocol: 'file:',
@@ -113,4 +138,25 @@ function createWindow() {
         win = null;
     });
 }
+//If the app is already loaded it show the window
+electron_1.ipcMain.on('load', function (event, arg) {
+    win.show();
+});
+//Send the cycle object and insert it in database ciclos propertie
+electron_1.ipcMain.on('sendCycle', function (event, arg) {
+    var cycle = arg.cycle;
+    if (cycle !== '') {
+    }
+    event.returnValue = 'success';
+});
+// Take the Excel file and parse it to json also validate the header columns
+electron_1.ipcMain.on('excel', function (event, arg) {
+    if (arg) {
+        var workbook = XLSX.read(arg, { type: 'binary' });
+        var sheetName = workbook.SheetNames;
+        var sheetToJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName[0]], { range: 3, blankrows: true });
+        console.log(sheetToJson);
+    }
+    event.returnValue = true;
+});
 //# sourceMappingURL=main.js.map

@@ -1,0 +1,26 @@
+<div>
+  <h1 class="center-text emailTitle">Agregar Email de administrador</h1>
+  <div class="row">
+    <div class="col-6 center-text center-vertical">
+      <span>Email:</span>
+    </div>
+    <div class="col-6">
+      <form [formGroup]="formGroup" (ngSumbit)="sendEmail()" id="emailForm">
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input formControlName="email" class="emailInput" matInput placeholder="Email">
+          <mat-error *ngIf="formGroup.controls['email'].errors?.required">Introduzca un email valido</mat-error>
+          <mat-error *ngIf="formGroup.controls['email'].errors?.email">Introduzca un email valido</mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+    <div class="row full-width">
+      <div class="col-12 center-text">
+        <div class="button-wrapper">
+          <button mat-raised-button color="secondary" (click)="sendEmail()" class="crearEmailBtn" type="submit"
+            matStepperNext form="emailForm"><b>Siguiente</b></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

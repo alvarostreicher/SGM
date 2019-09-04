@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnChanges, ChangeDetectorRef } from '@angular/core';
 import { MainServiceService } from './services/main-service.service';
+import { DashboardService } from './services/dashboard.service';
 
 @Component({
   selector: 'app-root',
@@ -7,15 +8,16 @@ import { MainServiceService } from './services/main-service.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnChanges{
-  constructor(private electron: MainServiceService, private cdr: ChangeDetectorRef) { }
+  showMenu: boolean;
+  showMenusvg: boolean = false;
+  
+  constructor(private electron: MainServiceService, private cdr: ChangeDetectorRef, private data: DashboardService) { }
 
   ngOnInit() {
-    // this.isStartScreenCycle = this.electron.isStartScreenCycle;
-    // this.electron.responseCycle.subscribe((value) => {
-    //   console.log(value);
-    //   this.cdr.detectChanges();
-    // })
+    this.electron.isMenuShown();
     this.electron.load();
+    this.electron.showMenu.subscribe((value) => this.showMenu = value);
+    this.data.getData();
   }
 
   ngOnChanges() {

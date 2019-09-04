@@ -1,0 +1,20 @@
+<mat-horizontal-stepper [linear]="true" #stepper>
+  <mat-step [completed]="cycleCompleted">
+    <ng-template matStepLabel>Creacion de ciclo Escolar</ng-template>
+    <app-add-cycle (CycleAdded)="getCycleAddedValidation($event, stepper)"></app-add-cycle>
+  </mat-step>
+  <mat-step [completed]="email">
+    <ng-template matStepLabel>Email de administrador</ng-template>
+    <app-admin-email (adminEmailAdded)="getEmailValidation($event, stepper)"></app-admin-email>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Excel de Docentes</ng-template>
+    <app-upload-excel></app-upload-excel>
+  </mat-step>
+  <ng-template matStepperIcon="edit">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24">
+      <path class="fill"
+        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+      <path d="M0 0h24v24H0z" fill="none" /></svg>
+  </ng-template>
+</mat-horizontal-stepper>

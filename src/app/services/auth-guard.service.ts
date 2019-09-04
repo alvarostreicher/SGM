@@ -13,7 +13,12 @@ export class AuthGuardService {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.isElectron) {
      const flag: any = this._electronService.ipcRenderer.sendSync('cycleStartScreen', null);
-     return flag;
+     if(flag) {
+       return flag;
+     } else {
+      this.router.navigate(['dashboard']);
+      return flag;
+     }
     }
   }
 }

@@ -40,12 +40,15 @@ var electron_1 = require("electron");
 var DB = require('nedb-async').default;
 var XLSX = require('xlsx');
 var win;
+var dateCycle, adminEmail, rangoFechas;
+var getYear = new Date().getFullYear();
+/* Creates the database */
 var dbFactory = new DB({
     filename: 'database.db',
     autoload: true
 });
 /*
-  Check if database is empty and populate with propierties
+  Check if database is empty and if is, populate it
 */
 var dataInDBExist = function () { return __awaiter(_this, void 0, void 0, function () {
     var newObj, isEmtpy;
@@ -55,21 +58,37 @@ var dataInDBExist = function () { return __awaiter(_this, void 0, void 0, functi
                 newObj = {
                     maestros: [],
                     materias: [],
-                    ciclos: []
+                    ciclos: [],
+                    ciclosindex: [],
+                    fechasEvaluacion: {
+                        eneJun: [],
+                        agoDic: []
+                    },
+                    settings: {
+                        adminEmail: '',
+                        inicioEneJun: new Date('01-12-' + getYear),
+                        finEneJun: new Date('06-12-' + getYear),
+                        inicioAgoDic: new Date('08-14-' + getYear),
+                        finAgoDic: new Date('12-12-' + getYear),
+                        rangoFechas: 2
+                    }
                 };
                 return [4 /*yield*/, dbFactory.asyncFind({})];
             case 1:
                 isEmtpy = _a.sent();
-                if (isEmtpy.length === 0) {
-                    dbFactory.insert(newObj, function (err, newDoc) {
-                        console.log(newDoc);
-                    });
-                }
-                return [2 /*return*/];
+                if (!(isEmtpy.length === 0)) return [3 /*break*/, 3];
+                return [4 /*yield*/, dbFactory.asyncInsert(newObj)];
+            case 2:
+                _a.sent();
+                _a.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); };
 dataInDBExist();
+/* Get the global id crated for the database */
+var global;
+/* Checks if the first screen on open should be cycle creation */
 electron_1.ipcMain.on('cycleStartScreen', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
     var value;
     return __generator(this, function (_a) {
@@ -80,40 +99,23 @@ electron_1.ipcMain.on('cycleStartScreen', function (event, arg) { return __await
                 if (value.ciclos.length === 0) {
                     event.returnValue = true;
                 }
+                else {
+                    event.returnValue = false;
+                }
+                global = value;
                 return [2 /*return*/];
         }
     });
 }); });
-var global;
-function getGloablId() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, dbFactory.asyncFind({})];
-                case 1:
-                    global = _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-getGloablId();
-// async function getGloablId(){
-//   global = await dbFactory.asyncFind({});
-//   console.log(global);
-//   // tslint:disable-next-line: no-string-literal
-//   // console.log(global[0]['_id']);
-//   // dbFactory.update({_id: global[0]['_id'] }, { $push: { ciclos: { 'agosto/diciembre/2019': [] } } }, (err, newDoc)=>{
-//   //   console.log('error', err);
-//   //   console.log('new doc', newDoc);
-//   // })
-// }
+/* On ready creates the window */
 electron_1.app.on('ready', createWindow);
+/* On activate call the create function window */
 electron_1.app.on('activate', function () {
     if (win === null) {
         createWindow();
     }
 });
+/* On close all windows quit the app */
 electron_1.app.on('window-all-closed', function () {
     electron_1.app.quit();
 });
@@ -136,24 +138,157 @@ function createWindow() {
         win = null;
     });
 }
-//If the app is already loaded it show the window
+/* If the app is already loaded it show the window */
 electron_1.ipcMain.on('load', function (event, arg) {
     win.show();
 });
-//Send the cycle object and insert it in database ciclos propertie
+/* Send the cycle object and insert it in database ciclos propertie */
 electron_1.ipcMain.on('sendCycle', function (event, arg) {
     var cycle = arg.cycle;
     if (cycle !== '') {
+        dateCycle = cycle;
     }
     event.returnValue = 'success';
 });
-// Take the Excel file and parse it to json also validate the header columns
-electron_1.ipcMain.on('excel', function (event, arg) {
-    if (arg) {
-        var workbook = XLSX.read(arg, { type: 'binary' });
-        var sheetName = workbook.SheetNames;
-        var sheetToJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName[0]], { range: 3, blankrows: true });
-        console.log(sheetToJson);
+/* Saves admin email on admin email variable */
+electron_1.ipcMain.on('adminEmail', function (event, arg) {
+    var email = arg.email;
+    if (email !== '') {
+        adminEmail = email;
+        event.returnValue = true;
+    }
+    else {
+        event.returnValue = false;
     }
 });
+/* Function that insert admin email to the database */
+var saveAdminEmail = function (email) {
+    if (email) {
+        dbFactory.update({ _id: global['_id'] }, { $set: { "settings.adminEmail": email } }, function (err, newDoc) { return console.log('email error', err); });
+    }
+};
+var createDateRanges = function () {
+    var ranges = [];
+    var size = global['settings']['rangoFechas'] * 7;
+    if (dateCycle.includes('Agosto/Diciembre')) {
+        var inicio = new Date(global['settings']['inicioAgoDic']);
+        var fin = new Date(global['settings']['finAgoDic']);
+        var range = new Date(inicio.setDate(inicio.getDate() + size));
+        ranges.push(new Date(range));
+        while (range.getTime() < fin.getTime()) {
+            range = new Date(range.setDate(range.getDate() + size));
+            ranges.push(new Date(range));
+        }
+        ranges.pop();
+        dbFactory.update({ _id: global['_id'] }, { $set: { "fechasEvaluacion.agoDic": ranges } }, function (err, newDoc) { return console.log('Rango Fechas ago/dic error', err); });
+    }
+    else if (dateCycle.includes('Enero/Junio')) {
+        var inicio = new Date(global['settings']['inicioEneJun']);
+        var fin = new Date(global['settings']['finEneJun']);
+        var range = new Date(inicio.setDate(inicio.getDate() + size));
+        ranges.push(new Date(range));
+        while (range.getTime() < fin.getTime()) {
+            range = new Date(range.setDate(range.getDate() + size));
+            ranges.push(new Date(range));
+        }
+        ranges.pop();
+        dbFactory.update({ _id: global['_id'] }, { $set: { "fechasEvaluacion.eneJun": ranges } }, function (err, newDoc) { return console.log('Rango Fechas ene/jun error', err); });
+    }
+    if (ranges.length > 0) {
+        return ranges;
+    }
+};
+/* Take the Excel file and parse it to json also validate the header columns */
+electron_1.ipcMain.on('excel', function (event, arg) {
+    var _a;
+    try {
+        if (arg && dateCycle) {
+            // saves admin email
+            saveAdminEmail(adminEmail);
+            // saves dates ranges for emails
+            var ranges_1 = createDateRanges();
+            console.log(ranges_1);
+            // cycle object to push over cycle databse using [datacycle]: [cycleobj]
+            var cycleObj_1 = [];
+            // Maestros object to push over maestros database
+            var maestrosObj = [];
+            // Materias object to push over materias database
+            var materiasObj = [];
+            // temporal obj template
+            var temporalObj_1 = {
+                maestro: {},
+                materias: [],
+                total: 0
+            };
+            // reads the excel file from a binary source
+            var workbook = XLSX.read(arg, { type: 'binary' });
+            // saves the sheet excel name
+            var sheetName = workbook.SheetNames;
+            // convert sheet binary to JSON starting the third row as column data for JSON properties
+            var sheetToJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName[0]], { range: 3 });
+            // iterates through JSON object to save data on the database;
+            sheetToJson.map(function (values) {
+                // check if the propertie name exists and is string type
+                if (typeof values.Nombre === 'string') {
+                    var splitting = values.Nombre.split(' ');
+                    var slicing = splitting.slice(3, splitting.length);
+                    temporalObj_1['maestro'] = { 'Nombre': slicing.join(' ') };
+                    var trimming = values.Nombre.match(/\[(.*?)\]/g);
+                    temporalObj_1['maestro']['externalId'] = trimming[1].replace('[', '').replace(']', '');
+                    // Check if theres no empty object and the properties dont have name
+                }
+                else if ((Object.entries(values).length > 0 && values.Nombre === undefined)) {
+                    var evaluaciones = [];
+                    for (var i = 0; i < ranges_1.length; i = i + 1) {
+                        evaluaciones.push(null);
+                    }
+                    var evaluacionProperty = Object.assign(values, { evaluacion: evaluaciones });
+                    temporalObj_1['materias'].push(evaluacionProperty);
+                    // Check if the type of property Nombre is number
+                }
+                else if (typeof values.Nombre === 'number') {
+                    temporalObj_1.total = values.Nombre;
+                    cycleObj_1.push(temporalObj_1);
+                    temporalObj_1 = {
+                        maestro: '',
+                        materias: [],
+                        total: 0
+                    };
+                }
+                else {
+                    console.log('im failing filtering values');
+                    // if doesnt had any of the properties it will fail
+                    event.returnValue = false;
+                }
+            });
+            //if cycles object is populated insert to database ciclos
+            if (cycleObj_1.length > 0) {
+                dbFactory.update({ _id: global['_id'] }, { $push: { ciclosindex: dateCycle } }, function (err, newDoc) { return console.log(err); });
+                dbFactory.update({ _id: global['_id'] }, { $push: { ciclosindex: "enero/agosto/2020" } }, function (err, newDoc) { return console.log(err); });
+                dbFactory.update({ _id: global['_id'] }, { $push: { ciclos: (_a = {}, _a[dateCycle] = cycleObj_1, _a) } }, function (err, newDoc) {
+                    console.log('error updating cycles', err);
+                    // console.log('new doc', newDoc);
+                });
+            }
+        }
+        event.returnValue = true;
+    }
+    catch (e) {
+        console.log('error on lecture', e);
+        event.returnValue = false;
+    }
+});
+electron_1.ipcMain.on('getOnlyCycles', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = event;
+                return [4 /*yield*/, dbFactory.asyncFind({})];
+            case 1:
+                _a.returnValue = _b.sent();
+                return [2 /*return*/];
+        }
+    });
+}); });
 //# sourceMappingURL=main.js.map

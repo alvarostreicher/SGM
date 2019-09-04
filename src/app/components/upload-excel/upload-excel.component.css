@@ -7,16 +7,82 @@
     flex-direction: column;
     margin-top: 5rem;
 }
+
+.upload-excel.vertical-align .row {
+    width: 100%;
+}
+
 .upload-excel.vertical-align .btn.upload{
-    width: 15vw;
+    width: 12rem;
     margin-top: 2rem;
 }
 
 .upload-excel.vertical-align .uploadTag{
-    line-height: 6;
+    display: block;
+    text-align: right;
+    margin-right: 2rem;
+    margin-top: 2.5rem;
 }
 
 .upload-excel.vertical-align .btn2 {
-    min-width: 15vw;
+    min-width: 15rem;
     margin-top: 2rem;
 }
+
+.upload-excel.vertical-align .upload-wrapper {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.upload-excel.vertical-align .btnImg svg {
+    align-self: center;
+}
+
+.upload-excel.vertical-align .btnImg .svg {
+    fill: #fff;
+}
+
+.upload-excel.vertical-align .upload-wrapper .uploadButtonTag {
+    font-size: 1.1rem;
+}
+
+.upload-excel.vertical-align .progress-bar {
+  width: 50%;
+  margin: 0 auto;
+}
+
+.upload-excel.vertical-align .mat-progress-bar {
+  margin-top: 1rem;
+}
+
+.upload-excel.vertical-align .successColor {
+  color: #00b894;
+  fill: #00b894;
+}
+
+.upload-excel.vertical-align .successMessage {
+  display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.upload-excel.vertical-align .errorColor {
+  color: #d63031;
+  fill: #d63031;
+}
+
+.upload-excel.vertical-align .chip-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.upload-excel.vertical-align .chip-wrapper .chip-text {
+  align-self: center;
+  margin-left: 3rem;
+  margin-right: 1rem;
+}
+
+
+
