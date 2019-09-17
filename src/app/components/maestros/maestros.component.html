@@ -1,0 +1,36 @@
+<div class="docentesWrapper">
+  <mat-accordion class="example-headers-align">
+    <mat-expansion-panel (opened)="openAccordion = true" (closed)="openAccordion = false" [expanded]="expand"
+      *ngFor="let docentes of data; let generalIndex = index" class="separation"
+      [disabled]="!docentes?.maestro?.visible">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ docentes?.maestro?.Nombre }}
+        </mat-panel-title>
+        <mat-panel-description>
+          <mat-slide-toggle [checked]="docentes?.maestro?.visible"
+            (change)="isActivate($event, generalIndex, docentes?.maestro?.externalId)">
+            {{docentes.maestro.visible === false ? 'Activar' : 'Desactivar'}}</mat-slide-toggle>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p><b>Materias</b></p>
+      <p *ngFor="let materias of docentes.materias">{{ materias?.Materia }}</p>
+      <span><b>Email:</b></span> <span *ngIf="docentes?.maestro?.email !== ''"
+        class="margin-left">{{docentes?.maestro?.email}}</span> <button *ngIf="docentes?.maestro?.email !== ''"
+        class="margin-left" color="primary" mat-mini-fab (click)="onEdit(generalIndex)"><svg xmlns="http://www.w3.org/2000/svg" width="18"
+          height="18" viewBox="0 0 24 24">
+          <path class="fill"
+            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+          <path d="M0 0h24v24H0z" fill="none" /></svg></button>
+      <form [formGroup]="group" (ngSubmit)="addEmail(generalIndex)" *ngIf="docentes?.maestro?.email === ''">
+        <mat-form-field>
+          <mat-label>Escribir Email</mat-label>
+          <input formControlName="email" type="text" matInput>
+        </mat-form-field>
+        <button type="submit" *ngIf="docentes?.maestro?.email === ''" mat-raised-button color="secondary"
+          class="margin-left">Agregar
+          Email</button>
+      </form>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

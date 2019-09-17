@@ -1,0 +1,8 @@
+<div mat-dialog-content>
+  <p>Desea eliminar la evaluacion <b>{{ data.index }}</b> de la materia {{ data.materia }}</p>
+  <p>Impartida por el Maestro: {{ data.maestro }}</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="danger" (click)="onErase()">Borrar</button>
+</div>

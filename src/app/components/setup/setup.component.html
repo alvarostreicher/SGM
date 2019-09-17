@@ -3,7 +3,7 @@
     <ng-template matStepLabel>Creacion de ciclo Escolar</ng-template>
     <app-add-cycle (CycleAdded)="getCycleAddedValidation($event, stepper)"></app-add-cycle>
   </mat-step>
-  <mat-step [completed]="email">
+  <mat-step [completed]="email" *ngIf="!allSteps">
     <ng-template matStepLabel>Email de administrador</ng-template>
     <app-admin-email (adminEmailAdded)="getEmailValidation($event, stepper)"></app-admin-email>
   </mat-step>

@@ -40,6 +40,15 @@
   background-color: #00b894;
 }
 
+.mat-danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.warningSvg {
+  fill: #ffc107;
+}
+
 .successSVG {
   fill: #00b894;
 }

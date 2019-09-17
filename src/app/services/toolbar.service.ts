@@ -15,7 +15,6 @@ export class ToolbarService {
   getCycles() {
     if (this.isElectron) {
       const [cycles] = this._electronService.ipcRenderer.sendSync('getOnlyCycles', null);
-      console.log('im running get cycles on toolbar service')
       this.listOfCycles.next(cycles.ciclosindex);
       this.cycleSelected.next(cycles.ciclosindex[0]);
     }

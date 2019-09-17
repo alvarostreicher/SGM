@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MainServiceService } from 'src/app/services/main-service.service';
@@ -11,6 +11,7 @@ import { MainServiceService } from 'src/app/services/main-service.service';
 export class SetupComponent implements OnInit {
   cycleCompleted = false;
   email = false;
+  @Input() allSteps;
   constructor(private formBuilder: FormBuilder, private electron: MainServiceService) { }
 
   ngOnInit() {

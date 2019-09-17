@@ -39,8 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var DB = require('nedb-async').default;
 var XLSX = require('xlsx');
+var nodeMailer = require('nodemailer');
 var win;
-var dateCycle, adminEmail, rangoFechas;
+var dateCycle, adminEmail, rangoFechas, maestros, transporter;
 var getYear = new Date().getFullYear();
 /* Creates the database */
 var dbFactory = new DB({
@@ -60,12 +61,14 @@ var dataInDBExist = function () { return __awaiter(_this, void 0, void 0, functi
                     materias: [],
                     ciclos: [],
                     ciclosindex: [],
+                    cicleEvaluated: [],
                     fechasEvaluacion: {
                         eneJun: [],
                         agoDic: []
                     },
                     settings: {
                         adminEmail: '',
+                        adminPassword: '',
                         inicioEneJun: new Date('01-12-' + getYear),
                         finEneJun: new Date('06-12-' + getYear),
                         inicioAgoDic: new Date('08-14-' + getYear),
@@ -103,6 +106,8 @@ electron_1.ipcMain.on('cycleStartScreen', function (event, arg) { return __await
                     event.returnValue = false;
                 }
                 global = value;
+                /* execute SMFTP Service */
+                initializedSMFTP();
                 return [2 /*return*/];
         }
     });
@@ -152,7 +157,7 @@ electron_1.ipcMain.on('sendCycle', function (event, arg) {
 });
 /* Saves admin email on admin email variable */
 electron_1.ipcMain.on('adminEmail', function (event, arg) {
-    var email = arg.email;
+    var email = arg;
     if (email !== '') {
         adminEmail = email;
         event.returnValue = true;
@@ -161,18 +166,35 @@ electron_1.ipcMain.on('adminEmail', function (event, arg) {
         event.returnValue = false;
     }
 });
+/* initialized smftp */
+var initializedSMFTP = function () {
+    if (global['settings']['adminEmail'] !== '' && global['settings']['adminPassword'] !== '') {
+        transporter = nodeMailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: global['settings']['adminEmail'],
+                pass: global['settings']['adminPassword']
+            }
+        });
+    }
+};
 /* Function that insert admin email to the database */
 var saveAdminEmail = function (email) {
     if (email) {
-        dbFactory.update({ _id: global['_id'] }, { $set: { "settings.adminEmail": email } }, function (err, newDoc) { return console.log('email error', err); });
+        dbFactory.update({ _id: global['_id'] }, { $set: { "settings.adminEmail": email.email } }, function (err, newDoc) { return console.log('email error', err); });
+        dbFactory.update({ _id: global['_id'] }, { $set: { "settings.adminPassword": email.pass } }, function (err, newDoc) { return console.log('password error', err); });
     }
 };
+/* Function that creates the range of dates for teachers to send evaluation plan every two weeks by default */
 var createDateRanges = function () {
     var ranges = [];
     var size = global['settings']['rangoFechas'] * 7;
     if (dateCycle.includes('Agosto/Diciembre')) {
         var inicio = new Date(global['settings']['inicioAgoDic']);
+        var year = dateCycle.match(/\d+/g)[0];
+        inicio.setFullYear(year);
         var fin = new Date(global['settings']['finAgoDic']);
+        fin.setFullYear(year);
         var range = new Date(inicio.setDate(inicio.getDate() + size));
         ranges.push(new Date(range));
         while (range.getTime() < fin.getTime()) {
@@ -180,11 +202,15 @@ var createDateRanges = function () {
             ranges.push(new Date(range));
         }
         ranges.pop();
+        // tslint:disable-next-line: max-line-length
         dbFactory.update({ _id: global['_id'] }, { $set: { "fechasEvaluacion.agoDic": ranges } }, function (err, newDoc) { return console.log('Rango Fechas ago/dic error', err); });
     }
     else if (dateCycle.includes('Enero/Junio')) {
         var inicio = new Date(global['settings']['inicioEneJun']);
+        var year = dateCycle.match(/\d+/g)[0];
+        inicio.setFullYear(year);
         var fin = new Date(global['settings']['finEneJun']);
+        fin.setFullYear(year);
         var range = new Date(inicio.setDate(inicio.getDate() + size));
         ranges.push(new Date(range));
         while (range.getTime() < fin.getTime()) {
@@ -192,22 +218,35 @@ var createDateRanges = function () {
             ranges.push(new Date(range));
         }
         ranges.pop();
+        // tslint:disable-next-line: max-line-length
         dbFactory.update({ _id: global['_id'] }, { $set: { "fechasEvaluacion.eneJun": ranges } }, function (err, newDoc) { return console.log('Rango Fechas ene/jun error', err); });
     }
     if (ranges.length > 0) {
         return ranges;
     }
 };
+/* Set maestros externalID to verify if exist or not */
+var getMaestros = function () {
+    if (global['maestros'].length > 0) {
+        global['maestros'].map(function (value) {
+            maestros = new Set(value['externalId']);
+        });
+    }
+    else {
+        maestros = new Set();
+    }
+};
 /* Take the Excel file and parse it to json also validate the header columns */
 electron_1.ipcMain.on('excel', function (event, arg) {
-    var _a;
+    var _a, _b;
     try {
         if (arg && dateCycle) {
+            // save maestros on a Set to verify if exist
+            getMaestros();
             // saves admin email
             saveAdminEmail(adminEmail);
             // saves dates ranges for emails
             var ranges_1 = createDateRanges();
-            console.log(ranges_1);
             // cycle object to push over cycle databse using [datacycle]: [cycleobj]
             var cycleObj_1 = [];
             // Maestros object to push over maestros database
@@ -235,12 +274,18 @@ electron_1.ipcMain.on('excel', function (event, arg) {
                     temporalObj_1['maestro'] = { 'Nombre': slicing.join(' ') };
                     var trimming = values.Nombre.match(/\[(.*?)\]/g);
                     temporalObj_1['maestro']['externalId'] = trimming[1].replace('[', '').replace(']', '');
+                    temporalObj_1['maestro']['visible'] = true;
+                    temporalObj_1['maestro']['email'] = '';
+                    // Check if email exist and added to the object
+                }
+                else if (values.Correo) {
+                    temporalObj_1['maestro']['email'] = values.correo;
                     // Check if theres no empty object and the properties dont have name
                 }
                 else if ((Object.entries(values).length > 0 && values.Nombre === undefined)) {
                     var evaluaciones = [];
                     for (var i = 0; i < ranges_1.length; i = i + 1) {
-                        evaluaciones.push(null);
+                        evaluaciones.push({ value: null, evaluated: null });
                     }
                     var evaluacionProperty = Object.assign(values, { evaluacion: evaluaciones });
                     temporalObj_1['materias'].push(evaluacionProperty);
@@ -248,6 +293,9 @@ electron_1.ipcMain.on('excel', function (event, arg) {
                 }
                 else if (typeof values.Nombre === 'number') {
                     temporalObj_1.total = values.Nombre;
+                    if (!maestros.has(temporalObj_1['maestro'['externalId']])) {
+                        dbFactory.update({ _id: global['_id'] }, { $push: { maestros: temporalObj_1 } });
+                    }
                     cycleObj_1.push(temporalObj_1);
                     temporalObj_1 = {
                         maestro: '',
@@ -264,8 +312,8 @@ electron_1.ipcMain.on('excel', function (event, arg) {
             //if cycles object is populated insert to database ciclos
             if (cycleObj_1.length > 0) {
                 dbFactory.update({ _id: global['_id'] }, { $push: { ciclosindex: dateCycle } }, function (err, newDoc) { return console.log(err); });
-                dbFactory.update({ _id: global['_id'] }, { $push: { ciclosindex: "enero/agosto/2020" } }, function (err, newDoc) { return console.log(err); });
-                dbFactory.update({ _id: global['_id'] }, { $push: { ciclos: (_a = {}, _a[dateCycle] = cycleObj_1, _a) } }, function (err, newDoc) {
+                dbFactory.update({ _id: global['_id'] }, { $push: { cicleEvaluated: (_a = {}, _a[dateCycle] = [], _a) } }, function (err, newDoc) { console.log('error creating evaluation cycle'); });
+                dbFactory.update({ _id: global['_id'] }, { $push: { ciclos: (_b = {}, _b[dateCycle] = cycleObj_1, _b) } }, function (err, newDoc) {
                     console.log('error updating cycles', err);
                     // console.log('new doc', newDoc);
                 });
@@ -291,4 +339,76 @@ electron_1.ipcMain.on('getOnlyCycles', function (event, arg) { return __awaiter(
         }
     });
 }); });
+electron_1.ipcMain.on('saveCycleDataToDB', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    var temporal;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dbFactory.update({ _id: global['_id'] }, { $set: { ciclos: arg } }, function (err, num, newDoc) {
+                    console.log('error saving cicle', err);
+                    if (!err) {
+                        event.returnValue = newDoc;
+                    }
+                })];
+            case 1:
+                temporal = _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); });
+electron_1.ipcMain.on('saveCycleEvaluation', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dbFactory.asyncUpdate({ _id: global['_id'] }, { $set: { cicleEvaluated: arg } })];
+            case 1:
+                _a.sent();
+                event.returnValue = true;
+                return [2 /*return*/];
+        }
+    });
+}); });
+electron_1.ipcMain.on('saveEmail', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dbFactory.asyncUpdate({ _id: global['_id'] }, { $set: { maestros: arg } })];
+            case 1:
+                _a.sent();
+                event.returnValue = true;
+                return [2 /*return*/];
+        }
+    });
+}); });
+electron_1.ipcMain.on('isVisible', function (event, arg) { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dbFactory.asyncUpdate({ _id: global['_id'] }, { $set: { maestros: arg.maestros } })];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, dbFactory.asyncUpdate({ _id: global['_id'] }, { $set: { ciclos: arg.cycleData['ciclos'] } })];
+            case 2:
+                _a.sent();
+                event.returnValue = true;
+                return [2 /*return*/];
+        }
+    });
+}); });
+electron_1.ipcMain.on('sendEmail', function (event, arg) {
+    var mailOptions = {
+        from: global['settings']['adminEmail'],
+        to: global['settings']['adminEmail'],
+        subject: 'this is a test',
+        html: '<p>Your html here</p>' // plain text body
+    };
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err) {
+            console.log(err);
+            event.reply('onEmailCallBack', err);
+            event.preventDefault();
+        }
+        else {
+            event.reply('onEmailCallBack', info);
+            event.preventDefault();
+        }
+    });
+    event.returnValue = true;
+});
 //# sourceMappingURL=main.js.map

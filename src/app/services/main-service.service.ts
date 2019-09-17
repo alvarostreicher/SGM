@@ -27,7 +27,7 @@ export class MainServiceService {
     }
   }
 
-  //Function thats add a new escolar cycle
+  // Function thats add a new escolar cycle
   addCycle(form: object) {
     if (this._electronService.isElectronApp) {
       this._electronService.ipcRenderer.send('sendCycle', form);
@@ -36,25 +36,24 @@ export class MainServiceService {
 
   // function that send admin email
   addEmail(form: object) {
-    if(this.isElectron) {
+    if (this.isElectron) {
       this._electronService.ipcRenderer.send('adminEmail', form);
     }
   }
 
-  //function that sends the Excel file
+  // function that sends the Excel file
   uploadExcel(file: any){
-    if(this.isElectron){
+    if (this.isElectron){
      const response = this._electronService.ipcRenderer.sendSync('excel', file);
      this.responseCycle.next(response);
     }
   }
 
-  //function that sends a messages once the application is loaded to show the window
+  // function that sends a messages once the application is loaded to show the window
   load() {
-    if(this.isElectron) {
+    if (this.isElectron) {
       this._electronService.ipcRenderer.send('load', null);
     }
   }
-
 
 }

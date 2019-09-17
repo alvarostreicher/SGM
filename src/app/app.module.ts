@@ -8,7 +8,7 @@ import { AppComponent } from './app.component';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
-import { NgxElectronModule, ElectronService } from 'ngx-electron';
+import { NgxElectronModule } from 'ngx-electron';
 import { AddCycleComponent } from './components/add-cycle/add-cycle.component';
 import { UploadExcelComponent } from './components/upload-excel/upload-excel.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -27,6 +27,16 @@ import { AdminEmailComponent } from './components/admin-email/admin-email.compon
 import { EvaluationRangeComponent } from './components/evaluation-range/evaluation-range.component';
 import {MatListModule} from '@angular/material/list';
 import { NotifierModule } from 'angular-notifier';
+import { DashboardEvaluationDialogComponent } from './components/dashboard-evaluation-dialog/dashboard-evaluation-dialog.component';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import { MaestrosComponent } from './components/maestros/maestros.component';
+import { SettingsComponent } from './components/settings/settings.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatCardModule} from '@angular/material/card';
+import { MatNativeDateModule } from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -37,7 +47,10 @@ import { NotifierModule } from 'angular-notifier';
     DashboardComponent,
     SetupComponent,
     AdminEmailComponent,
-    EvaluationRangeComponent
+    EvaluationRangeComponent,
+    DashboardEvaluationDialogComponent,
+    MaestrosComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -68,7 +81,17 @@ import { NotifierModule } from 'angular-notifier';
           distance: 100
         }
       }
-    })
+    }),
+    MatDialogModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+    FormsModule,
+    MatDatepickerModule,
+    MatCardModule,
+    MatNativeDateModule
+  ],
+  entryComponents: [
+    DashboardEvaluationDialogComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

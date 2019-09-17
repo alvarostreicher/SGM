@@ -1,0 +1,35 @@
+.example-headers-align .mat-expansion-panel-header-title,
+.example-headers-align .mat-expansion-panel-header-description {
+  flex-basis: 0;
+}
+
+  .example-headers-align .mat-expansion-panel-header-description {
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mat-expansion-panel-header-description {
+      flex-grow: 0;
+  }
+
+  .separation {
+      margin-bottom: 5px;
+  }
+
+  .docentesWrapper {
+      margin-top: 3rem;
+  }
+
+  .mat-expansion-panel-header.mat-expanded,
+.mat-expansion-panel-header.mat-expanded:hover,
+.mat-expansion-panel-header.mat-expanded:focus {
+    background-color: var(--toolbar-color);
+}
+
+.mat-expansion-panel-header.mat-expanded .mat-expansion-panel-header-title {
+    color: white;
+}
+
+.margin-left {
+  margin-left: 1rem;
+}

@@ -75,7 +75,11 @@
     background-color: #00b894;
   }
 
-  .mat-expansion-panel-header.mat-expanded,
+  .pending {
+    background-color: #ffee58;
+  }
+
+.mat-expansion-panel-header.mat-expanded,
 .mat-expansion-panel-header.mat-expanded:hover,
 .mat-expansion-panel-header.mat-expanded:focus {
     background-color: var(--toolbar-color);
@@ -93,4 +97,27 @@
 
 .mat-expansion-panel-header.mat-expanded .percentage {
   color: white;
+}
+
+.sendEmailContainer {
+  text-align: right;
+}
+
+.sendEmailContainer .sendEmail {
+  margin: 10px;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-wrapper .emailButtonGeneral   {
+  order: 1;
+  height: fit-content;
+}
+
+.marginTop5 {
+  margin-top: 5px;
 }

@@ -1,4 +1,4 @@
-<!-- <div class="row" [ngClass]="{'success': isLoaded }" *ngIf="isLoaded">
+<!-- <div class="row" [ngClass]="{'success': isLoaded }" *ngIf="$deadline | async">
   <div class="col-12 center-text">
     <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24">
       <path fill="none" d="M0 0h24v24H0V0z" />
@@ -13,7 +13,13 @@
   </div>
 </div> -->
 <div class="dashboard-wrapper">
-  <div class="full-width">
+  <div class="full-width search-wrapper">
+    <button *ngIf="notifyDocentes()" mat-raised-button color="primary" class="emailButtonGeneral"
+      (click)="sendAllEmail()">Notificar Docentes <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24">
+        <path class="fill"
+          d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        <path d="M0 0h24v24H0z" fill="none" /></svg></button>
     <mat-form-field>
       <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Buscar por Nombre">
       <svg matSuffix xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -24,7 +30,8 @@
   </div>
   <mat-accordion class="example-headers-align">
     <mat-expansion-panel (opened)="openAccordion = true" (closed)="openAccordion = false"
-      *ngFor="let dashboard of dataSource; let masterindex = index" class="separation">
+      *ngFor="let dashboard of dataSource; let masterindex = index" class="separation"
+      [disabled]="!dashboard?.maestro?.visible">
       <mat-expansion-panel-header>
         <mat-panel-title>
           <!-- hallar una forma de pasar el ciclo con observables -->
@@ -32,11 +39,11 @@
         </mat-panel-title>
         <mat-panel-description>
           <div style="width: 100%">
-            <mat-progress-bar mode="determinate" color="successBar" value="40"></mat-progress-bar>
-            <p class="percentage">40%</p>
+            <mat-progress-bar mode="determinate" color="successBar" [value]="overall[masterindex]"></mat-progress-bar>
+            <p class="percentage">{{overall[masterindex]}} %</p>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"
-            width="24" height="24">
+          <svg *ngIf="!showEmailButton(dashboard, masterindex)" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="24" height="24">
             <defs>
               <path id="a" d="M0 0h24v24H0V0z" />
             </defs>
@@ -46,9 +53,23 @@
             <path clip-path="url(#b)" class="successSVG"
               d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm5 16H7v-2h10v2zm-6.7-4L7 10.7l1.4-1.4 1.9 1.9 5.3-5.3L17 7.3 10.3 14z" />
           </svg>
+          <svg matTooltip="Falta Enviar Evaluacion" matTooltipPosition="above"
+            *ngIf="showEmailButton(dashboard, masterindex)" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            viewBox="0 0 24 24">
+            <path class="warningSvg"
+              d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z" />
+          </svg>
           <!-- Icono de que no ha entregado, cuando despliegue que salga un mensaje -->
         </mat-panel-description>
       </mat-expansion-panel-header>
+      <div *ngIf="showEmailButton(dashboard, masterindex)" class="sendEmailContainer">
+        <button mat-raised-button color="primary" (click)="SendIndividualEmail(masterindex)"
+          class="sendEmail">Enviar Correo <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            viewBox="0 0 24 24">
+            <path class="fill"
+              d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+            <path d="M0 0h24v24H0z" fill="none" /></svg></button>
+      </div>
       <table>
         <thead>
           <th>
@@ -60,7 +81,9 @@
           <tr *ngFor="let materias of dashboard.materias; let materiasindex = index" class="materias">
             <td>{{materias?.Materia}}</td>
             <td class="center-text" *ngFor="let evaluacion of materias?.evaluacion; let index = index"
-              (click)="clickEvaluation(masterindex, materiasindex, evaluacion, index)" [ngClass]="{'evaluated': evaluacion !== null}">{{evaluacion}}</td>
+              (click)="clickEvaluation(masterindex, materiasindex, evaluacion, index, dashboard.maestro.Nombre, materias.Materia)"
+              [ngClass]="{'evaluated': evaluacion?.evaluated === true, 'pending': evaluacion?.evaluated === false}">
+              {{evaluacion.value}}</td>
           </tr>
         </tbody>
       </table>
@@ -69,9 +92,16 @@
           Total:
         </span>
         <span>
-          {{dashboard?.total}}
+          <b> {{dashboard?.total}} </b>
         </span>
       </div>
     </mat-expansion-panel>
   </mat-accordion>
+  <div class="full-width center-text marginTop5">
+    <button mat-raised-button color="primary" *ngIf="loadMoreVisible" (click)="loadMore()">Cargar Mas <svg
+        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <path class="fill"
+          d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" />
+        <path d="M0 0h24v24H0z" fill="none" /></svg></button>
+  </div>
 </div>
